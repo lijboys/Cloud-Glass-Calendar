@@ -1,5 +1,3 @@
-
-```markdown
 # 📅 Cloud Glass Calendar
 
 一个基于 Cloudflare Pages + D1 构建的极简主义云端日历。
