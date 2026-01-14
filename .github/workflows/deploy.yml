@@ -1,8 +1,7 @@
 name: Deploy Calendar (Manual)
 
-# 关键修改在这里：
 on:
-  workflow_dispatch: # 👈 只有手动点击 "Run workflow" 才会触发
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -18,12 +17,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20' # 👈 关键修改：从 '18' 改为 '20'
 
       - name: Install Wrangler
         run: npm install -g wrangler
 
-      # 注入密钥 (保持之前的安全逻辑)
       - name: Inject Secrets
         env:
           REAL_D1_ID: ${{ secrets.D1_DATABASE_ID }}
@@ -41,7 +39,6 @@ jobs:
           
           echo "Secrets injected."
 
-      # 初始化数据库 (小写 db)
       - name: Migrate Database
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -49,7 +46,6 @@ jobs:
         run: |
           wrangler d1 execute my-calendar-db --file=./schema.sql --remote
 
-      # 部署
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
