@@ -1,4 +1,3 @@
----
 
 ```markdown
 # 📅 Cloud Glass Calendar
