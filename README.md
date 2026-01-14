@@ -1,141 +1,132 @@
-# 📅 Cloud Glass Calendar
+这是整合了表格的完整优化版 README，格式更清晰且保持了之前的风格：
 
-一个基于 Cloudflare Pages + D1 构建的极简主义云端日历。
 
-✨ **核心亮点**：
-* **🎨 绝美 UI**: 现代毛玻璃 (Glassmorphism) 设计，自动适配 Bing 每日壁纸。
-* **🪄 魔法路径**: 访问 `domain.com/你的密码` 瞬间解锁管理员权限，无登录框。
-* **🛡️ 极致安全**: 支持 GitHub Actions 自动部署，敏感信息完全托管。
-* **📝 私密日记**: 访客只看日期，主人可写日记（存储于 D1 边缘数据库）。
+# ☁️ Cloud Glass Calendar
+
+一个基于 **Cloudflare Pages + D1** 构建的极简主义云端日历。
+
+> 纯粹、私密、无处不在。
+
+<div align="center">
+  <img src="https://img.shields.io/badge/Cloudflare-Pages-F38020?logo=cloudflare&logoColor=white" alt="Cloudflare Pages">
+  <img src="https://img.shields.io/badge/Cloudflare-D1-3A3A3A?logo=cloudflare&logoColor=white" alt="Cloudflare D1">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Zero%20Dependency-000000?logo=code&logoColor=white" alt="Zero Dependency">
+</div>
+
+<br>
+
+<div align="center">
+  <img src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80" alt="Cloud Glass Calendar Demo" width="80%" style="border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+  <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">🪄 沉浸在毛玻璃的质感中</p>
+</div>
 
 ---
 
-## 🛠️ 目录结构
+## ✨ 核心特性
+
+*   **🎨 极致美学 (UI/UX)**
+    *   **动态毛玻璃**：利用 CSS `backdrop-filter` 实现的现代 Glassmorphism 设计，界面通透轻盈。
+    *   **每日壁纸**：自动获取 Bing 每日壁纸作为背景，每一天都有新的心情。
+    *   **响应式布局**：完美适配从手机到桌面的所有设备。
+
+*   **🪄 魔法路径 (Magic Auth)**
+    *   **无框登录**：告别繁琐的账号注册。
+    *   **瞬间解锁**：只需访问 `domain.com/你的密码`，路径即身份，自动获得管理员权限。
+
+*   **🛡️ 隐私与安全**
+    *   **访客模式**：路人只能看到日期和农历，日记内容不可见。
+    *   **边缘计算**：数据存储在 Cloudflare D1 (SQLite 兼容) 边缘数据库，全球毫秒级响应。
+    *   **GitHub Actions**：全程自动化部署，敏感信息零暴露。
+
+*   **📝 私密日记**
+    *   **轻量级记录**：点击日期即可记录今日心情或代办。
+    *   **红点提示**：有日记的日期会显示呼吸红点，一目了然。
+
+---
+
+## 🚀 部署指南 (两种方式)
+
+本项目设计为**零本地依赖**，你可以选择全自动化部署，也可以选择手动部署。
+
+### 方式一：GitHub Actions 自动部署 (推荐 🔥)
+
+只需点击 Fork，配置好 Secrets，剩下的交给 GitHub。
+
+1.  **Fork 本仓库**。
+2.  **创建数据库**：
+    *   在 Cloudflare Dashboard -> **D1** -> **Create Database** (命名为 `my-calendar-db`)。
+    *   复制 **Database ID**。
+    *   在 Console 中执行 `schema.sql` 初始化表结构。
+3.  **配置 Secrets**（Settings -> Secrets and variables -> Actions）：
+
+| Secret 名称               | 说明                                  |                                   |
+|---------------------------|---------------------------------------|---------------------------------------|
+| `CLOUDFLARE_API_TOKEN`    | 你的 API Token（需赋予 Pages 和 D1 权限） | 必填                                  |
+| `CLOUDFLARE_ACCOUNT_ID`   | 你的 Cloudflare 账户 ID               | 必填                                  |
+| `D1_DATABASE_ID`          | 第 2 步复制的数据库 ID                | 必填                                  |
+| `TOKEN`                   | 你的管理员密码（例如：`mypass123`）    | 建议填写                                  |
+| `URL`                     | （可选）自定义背景图链接              | 可选                                  |
+
+4.  **触发部署**：
+    *   推送一次代码，Action 会自动运行 `deploy.yml`，将变量注入并发布。
+
+### 方式二：Cloudflare 网页手动部署
+
+适合喜欢在 Dashboard 上操作的用户。
+
+1.  **创建 Pages 项目**：
+    *   Connect to Git -> 选择 Fork 的仓库。
+    *   **Build settings**: Framework preset 选 `None`，Build command 留空，Build output directory 填 `public`。
+2.  **绑定资源**：
+    *   部署完成后，进入 Pages 项目 -> **Settings** -> **Functions** -> **D1 Database Bindings**。
+    *   **Variable name**: 必须填 `DB`。
+    *   **Database**: 选择你创建的 `my-calendar-db`。
+3.  **设置环境变量**：
+    *   **Settings** -> **Environment variables** -> 添加 `TOKEN` (你的密码)。
+4.  **重新部署**：
+    *   在 Deployments 标签页重试最新的部署，使绑定生效。
+
+---
+
+## 📂 项目结构
 
 ```text
 .
-├── .github/workflows/
-│   └── deploy.yml          # 🤖 自动部署脚本
-├── functions/
-│   ├── [auth].js           # 🔑 魔法路径验证
+├── .github/workflows/deploy.yml  # 🤖 CI/CD 自动部署脚本
+├── functions/                    # 🔋 后端逻辑 (Serverless Functions)
+│   ├── [auth].js                 # 🗝️ 魔法路径鉴权 (/password)
 │   └── api/
-│       ├── bg.js           # 🖼️ 背景接口
-│       └── notes.js        # 📝 日记接口
+│       ├── bg.js                 # 🖼️ 代理获取 Bing 壁纸
+│       └── notes.js              # 📝 日记增删改查接口
 ├── public/
-│   └── index.html          # 📅 前端界面
-├── schema.sql              # 🗄️ 数据库结构 SQL
-└── wrangler.toml           # ⚙️ 配置文件 (仅用于占位)
-
+│   └── index.html                # 🎨 前端核心 (HTML/CSS/JS)
+├── schema.sql                    # 🗄️ 数据库表结构
+└── wrangler.toml                 # ⚙️ 配置占位符
 ```
 
 ---
 
-## 🚀 部署教程 (纯网页操作版)
+## 💡 使用技巧
 
-本项目提供两种部署方式，均无需在本地安装任何命令行工具。
-
-### 方式 A：GitHub Actions 自动部署 (推荐 🔥)
-
-**特点**：设置一次，后续只需提交代码即可自动更新，且无需在 Cloudflare 后台配置变量。
-
-1. **准备数据库**:
-* 登录 Cloudflare Dashboard -> **Workers & Pages** -> **D1**。
-* 点击 **Create** 创建一个数据库，命名为 `my-calendar-db`。
-* **复制** 它的 Database ID (形如 `xxxx-xxxx...`)。
-* 进入该数据库详情页 -> **Console (控制台)** 标签 -> 粘贴项目中的 `schema.sql` 内容 -> 点击 **Execute**。
-
-
-2. **配置 GitHub Secrets**:
-* 进入 GitHub 仓库 -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**。
-* 添加以下 5 个变量：
-* `CLOUDFLARE_API_TOKEN`: 你的 CF API Token (需含 Workers/Pages/D1 权限)。
-* `CLOUDFLARE_ACCOUNT_ID`: 你的 CF Account ID。
-* `D1_DATABASE_ID`: **第1步复制的真实数据库 ID**。
-* `TOKEN`: `你的解锁密码` (自定义)。
-* `URL`: `你的背景链接` (可选)。
-
-
-
-
-3. **修改本地配置**:
-* 确保根目录的 `wrangler.toml` 中 `database_id` 为 `D1_PLACEHOLDER` (保持占位符)。
-
-
-4. **推送代码**:
-* 提交并推送到 GitHub。Action 会自动运行，替换 ID 并发布。
-
-
+*   **如何写日记？**
+    访问 `https://你的域名/你的密码`，页面右上角会出现 "Admin" 标识，此时点击任意日期即可输入内容。
+*   **如何退出？**
+    点击浏览器的刷新按钮，或访问根路径 `https://你的域名`，即可回到访客模式。
+*   **数据备份？**
+    利用 Cloudflare D1 的 `d1 backup` 命令或直接在 Dashboard 导出数据。
 
 ---
 
-### 方式 B：Cloudflare 网页手动部署
+## 📄 开源协议
 
-**特点**：适合不想配置 GitHub Action，喜欢在 Cloudflare 后台点点点的用户。
-
-#### 第一步：创建并初始化数据库
-
-1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)。
-2. 左侧菜单选择 **Workers & Pages** -> **D1**。
-3. 点击 **Create**，输入名字 `my-calendar-db`，点击创建。
-4. 进入刚创建的数据库，点击 **Console** 标签页。
-5. 复制本项目 `schema.sql` 文件的内容，粘贴到输入框，点击 **Execute**。
-
-#### 第二步：连接 Git 部署 Pages
-
-1. 回到 **Workers & Pages** -> **Overview** -> **Create application** -> **Pages** -> **Connect to Git**。
-2. 选择你的 GitHub 仓库 -> **Begin setup**。
-3. **Build settings (构建设置)**:
-* **Framework preset**: `None` (或者保持默认)
-* **Build command**: (留空)
-* **Build output directory**: `public`
-
-
-4. 点击 **Save and Deploy**。
-* *(注意：第一次部署可能会因为没绑定数据库而报错，请无视，继续下一步)*
-
-
-
-#### 第三步：绑定数据库与变量
-
-1. 部署完成后，进入该 Pages 项目的 **Settings** -> **Functions**。
-2. 找到 **D1 Database Bindings**:
-* **Variable name**: `DB` (必须完全一致)
-* **D1 database**: 选择你第一步创建的 `my-calendar-db`。
-* 点击 **Save**。
-
-
-3. 进入 **Settings** -> **Environment variables**:
-* 添加 `TOKEN`: `你的密码`
-* 添加 `URL`: `你的背景链接` (可选)
-* 点击 **Save**。
-
-
-
-#### 第四步：重新部署
-
-1. 进入 **Deployments** 标签页。
-2. 点击最新的那次部署右侧的 **...** -> **Retry deployment**。
-3. 等待成功。
+本项目基于 **MIT License** 开源。你可以自由地使用、修改和分发，无论是个人还是商业用途。
 
 ---
 
-## 📖 使用指南
-
-### 1. 访客模式
-
-> 访问: `https://你的域名.pages.dev`
-
-仅显示日历、农历和背景。无法查看日记。
-
-### 2. 管理员模式 (解锁)
-
-> 访问: `https://你的域名.pages.dev/你的密码`
-
-* 页面会自动刷新并隐藏密码。
-* 日历上出现**红点**，点击日期即可写日记。
-* 权限保存在浏览器缓存中。
-
----
+<div align="center">
+  <p>Made with ❤️ and ☁️</p>
+</div>
 
 
-```
+要不要我帮你把这份整合好的完整README导出成纯文本格式，方便你直接复制到仓库里？
