@@ -23,26 +23,28 @@ jobs:
       - name: Install Wrangler
         run: npm install -g wrangler
 
-      # 🔥 核心修改：注入所有敏感信息 (ID + 密码 + URL)
+      # 🔥 核心步骤：注入密钥
+      # 1. 把 wrangler.toml 里的 D1_PLACEHOLDER 替换为真实的 D1 ID
+      # 2. 把 GitHub Secrets 里的 TOKEN 和 URL 写入文件
       - name: Inject Secrets
         env:
-          # 读取 GitHub Secrets
           REAL_D1_ID: ${{ secrets.D1_DATABASE_ID }}
           MY_TOKEN: ${{ secrets.TOKEN }}
           MY_URL: ${{ secrets.URL }}
         run: |
-          # 1. 替换数据库 ID (使用 sed 命令将占位符替换为真实 ID)
+          # 替换数据库 ID
           sed -i "s/D1_PLACEHOLDER/$REAL_D1_ID/g" wrangler.toml
           
-          # 2. 追加环境变量 (TOKEN 和 URL) 到文件末尾
+          # 追加环境变量
           echo "" >> wrangler.toml
           echo "[vars]" >> wrangler.toml
           echo "TOKEN = \"$MY_TOKEN\"" >> wrangler.toml
           echo "URL = \"$MY_URL\"" >> wrangler.toml
+          
+          echo "Secrets injected successfully."
 
-          # 验证一下 (为了安全，只打印文件后几行看格式，不打印 ID)
-          echo "Configuration injection complete."
-
+      # 初始化/更新数据库结构
+      # 注意：这里使用的是数据库名 'my-calendar-db'，不需要改动
       - name: Migrate Database
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -50,6 +52,7 @@ jobs:
         run: |
           wrangler d1 execute my-calendar-db --file=./schema.sql --remote
 
+      # 发布到 Cloudflare Pages
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
